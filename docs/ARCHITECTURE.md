@@ -1,40 +1,47 @@
-# Architecture
+# c0miX architecture
+
+## Purpose
+
+c0miX is a small full-stack Flask application for modelling comic series and issues while keeping canonical issue data separate from personal collection state.
+
+## Application layers
+
+```text
+Browser / API client
+        |
+        v
+     Flask app
+   /      |      \
+ views   JSON API  validation
+   |       |         |
+   +-------+---------+
+           |
+           v
+        SQLite
+```
 
 ## Domain model
 
-The application treats a comic run as a canonical sequence of issues rather than as a flat list of inventory records. This allows ownership, reading progress and gaps to be tracked independently from variant or reprint metadata.
+- **Series** stores canonical series identity and high-level metadata.
+- **Issues** belong to a series and store issue number, title, cover date and variant information.
+- **Collection** stores personal state such as ownership, reading status and notes.
 
-## Suggested boundaries
+Keeping collection state separate means canonical issue metadata does not change simply because a copy is bought, read or sold.
 
-- **Ingestion** — imports source data and normalises fields.
-- **Domain** — determines canonical ordering, run membership and gap state.
-- **Persistence** — stores series, issues, variants and user state.
-- **API/UI** — exposes search, run progress and collection views.
+## API surface
 
-## Core workflow
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/series` | Return series and collection summary |
+| GET | `/api/series/<id>/missing` | Find unowned canonical issues |
+| POST | `/series` | Add a series |
+| POST | `/series/<id>/issues` | Add an issue |
+| POST | `/issues/<id>/collection` | Update ownership/read state |
 
-```text
-Source data
-   ↓
-Normalization
-   ↓
-Canonical issue model
-   ↓
-Run calculation
-   ├── owned
-   ├── read
-   └── missing
-   ↓
-API / interface
-```
+## Design choices
 
-## Design principles
+SQLite keeps the project easy to run locally and makes the data model visible. Flask keeps the HTTP layer small and explicit. JSON endpoints are separate from HTML views so the same data model can support a future CLI or frontend.
 
-1. Keep source-specific identifiers separate from canonical issue identifiers.
-2. Do not treat variants and reprints as separate canonical issues unless the user explicitly chooses to do so.
-3. Store user state independently from imported metadata so source refreshes do not overwrite collection history.
-4. Keep data import repeatable and deterministic.
+## Future direction
 
-## Testing priorities
-
-The most important tests are ordering, duplicate detection, run membership, gap calculation and preservation of user state during re-imports.
+Potential next steps are external data import, richer variant modelling, pagination/search, migration tooling and automated tests around issue ordering, duplicate detection and missing-run calculations.
