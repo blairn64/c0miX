@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ series.name }} · c0miX</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <p><a href="{{ url_for('index') }}">← Back to series</a></p>
+    <header class="hero compact">
+      <p class="eyebrow">{{ series.publisher or 'Series' }}</p>
+      <h1>{{ series.name }}</h1>
+      <p>Canonical issue order with collection state.</p>
+    </header>
+
+    <section class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Issue</th><th>Title</th><th>Variant</th><th>Owned</th><th>Read</th></tr></thead>
+          <tbody>
+          {% for issue in issues %}
+          <tr>
+            <td>{{ issue.issue_number }}</td>
+            <td>{{ issue.title or '—' }}{% if issue.is_reprint %} <span class="tag">reprint</span>{% endif %}</td>
+            <td>{{ issue.variant_key }}</td>
+            <td>{{ 'Yes' if issue.owned else 'No' }}</td>
+            <td>{{ 'Yes' if issue.read else 'No' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="muted">No issues yet.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
