@@ -1,35 +1,85 @@
 # c0miX — Comic Collection & Run Tracker
 
-A personal software project for organising comic reading runs, issue order and collection data.
+A Flask + SQLite application for organising comic series, canonical issue runs and personal collection state.
 
-## Project goals
+The useful problem here is not simply storing a list of comics. The application keeps **canonical publication data** separate from **personal ownership/reading state**, which makes reprints, variants and missing issues easier to reason about.
 
-- Model comic series and issues in a structured database
-- Track reading and ownership state
-- Identify missing issues in a run
-- Handle issue ordering and reprints/variants without losing the canonical run
-- Provide a small API and a usable interface for exploring the collection
+## What it demonstrates
 
-## Technical direction
+- Python and Flask application development
+- Relational data modelling with SQLite
+- REST-style JSON endpoints
+- Server-rendered HTML with Jinja templates
+- Input validation and explicit error handling
+- Testable application structure with pytest
+- Containerisation with Docker
+- Separation of canonical data from user state
 
-The project is designed around a Python application with a relational data layer and a clean separation between data ingestion, domain logic and presentation.
+## Architecture
 
 ```text
-Comic data
-    ↓
-Canonical data model
-    ↓
-Database
-    ↓
-Application/API
-    ↓
-Run tracking + collection views
+                    +------------------+
+                    | Browser / API    |
+                    +--------+---------+
+                             |
+                             v
+                    +------------------+
+                    | Flask application |
+                    | views + JSON API  |
+                    +--------+---------+
+                             |
+                             v
+                    +------------------+
+                    | SQLite data model |
+                    +------------------+
+                      /      |       \
+                 series    issues   collection
 ```
 
-## Portfolio status
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the data-model and API decisions.
 
-This repository is being developed as a documented personal software project. Design notes and implementation decisions will be recorded in `docs/` so the repository shows both the finished application and the engineering reasoning behind it.
+## Current functionality
 
-## Safety
+- Create comic series
+- Add numbered issues
+- Represent variants and reprints without changing the canonical issue number
+- Track owned/read state
+- Show collection summaries
+- Query missing canonical issues through the API
+- Browse series and runs through the web interface
 
-No customer, employer or production information is required for this project. External datasets should be used in accordance with their licensing terms.
+## Run locally
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python app.py
+```
+
+Then open the local Flask address shown in the terminal.
+
+Run the tests with:
+
+```bash
+pytest -q
+```
+
+Windows PowerShell setup is documented in [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
+
+## Docker
+
+```bash
+docker build -t comix .
+docker run --rm -p 5000:5000 comix
+```
+
+For persistent data, mount `/app/data` to a local volume. SQLite files are excluded from Git.
+
+## Project direction
+
+The next useful development steps are richer issue/run calculation, search and pagination, deterministic external-data imports, stronger validation and a more complete collection UI.
+
+## Portfolio note
+
+This is a personal software project. It contains no employer, customer or production infrastructure. Any external comic data used with the application should be sourced and redistributed according to its licence.
