@@ -1,9 +1,10 @@
 import os
 import tempfile
+from pathlib import Path
 
 import pytest
 
-from app import app, get_db, init_db
+from app import app, init_db
 
 
 @pytest.fixture()
@@ -14,14 +15,14 @@ def client():
     app.config["TESTING"] = True
     import app as app_module
     original = app_module.DB_PATH
-    app_module.DB_PATH = path
+    app_module.DB_PATH = Path(path)
     init_db()
     with app.test_client() as test_client:
         yield test_client
     app_module.DB_PATH = original
     if old_db is not None:
         app.config["TEST_DB"] = old_db
-    os.unlink(path)
+    Path(path).unlink(missing_ok=True)
 
 
 def test_create_series_and_list(client):
